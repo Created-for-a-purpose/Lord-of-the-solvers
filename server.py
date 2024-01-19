@@ -32,8 +32,8 @@ app = FastAPI()
 def root():
     return {"Welcome to the Lord of the Solvers!"}
 
-@app.post("/predict_sentiment")
-def predict_sentiment(query: PredictRequest):
+@app.post("/predict_intent")
+def predict_intent(query: PredictRequest):
     encrypted_encoding = base64.b64decode(query.encrypted_encoding)
     evaluation_key = base64.b64decode(query.evaluation_key)
     prediction = fhe_model.run(encrypted_encoding, evaluation_key)
