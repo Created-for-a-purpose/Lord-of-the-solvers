@@ -1,6 +1,7 @@
 import "../styles/HomePage.css";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useState } from "react";
+import Popup from "../components/Popup"
 import token from "../assets/token.png";
 import gho from "../assets/gho.svg"
 import usdc from "../assets/usdc.svg"
@@ -13,11 +14,12 @@ function HomePage() {
         usdt: 0,
         gho: 0
     })
-
+    const states = ["Idle", "Generating FHE keys", "Encrypting your intent", "Solving your intent", "Solved"]
     const [userIntent, setUserIntent] = useState("");
+    const [status, setStatus] = useState("Idle");
 
     const handleSolveIntent = () => {
-        alert(`Solving user's intent: ${userIntent}`);
+        setStatus(states[4])
     };
 
     return (
@@ -61,10 +63,12 @@ function HomePage() {
                     value={userIntent}
                     onChange={(e) => setUserIntent(e.target.value)}
                 />
+                {status !== 'Idle' && <h3>{status}...</h3>}
                 <button className="solve-button" onClick={handleSolveIntent}>
                     Solve
                 </button>
             </div>
+            {status === 'Solved' && <Popup close={setStatus} />}
         </>
     );
 }

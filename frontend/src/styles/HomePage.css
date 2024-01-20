@@ -109,6 +109,13 @@ header h1 {
     font-size: 22px;
 }
 
+.intent-section h3 {
+    font-family: cursive;
+    color: #ffffff;
+    margin: 0;
+    font-size: 19px;
+}
+
 .intent-section input {
     width: 96%;
     height: 40px;
@@ -137,5 +144,6 @@ header h1 {
 
 .solve-button:hover {
     background-color: #ac8cf7;
-    color: black
+    color: black;
+    font-weight: bold;
 }
