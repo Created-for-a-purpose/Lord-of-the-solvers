@@ -1,24 +1,40 @@
-import logo from './logo.svg';
 import './App.css';
+import HomePage from './pages/HomePage';
+import '@rainbow-me/rainbowkit/styles.css';
+import {
+  getDefaultWallets,
+  RainbowKitProvider
+} from '@rainbow-me/rainbowkit';
+import { configureChains, createConfig, WagmiConfig } from 'wagmi';
+import { publicProvider } from 'wagmi/providers/public';
+import {
+  polygonMumbai, sepolia
+} from 'wagmi/chains';
+
+const { chains, publicClient } = configureChains(
+  [sepolia, polygonMumbai],
+  [publicProvider()]
+);
+
+const { connectors } = getDefaultWallets({
+  appName: 'CB',
+  projectId: 'cbabb06b3a049fce0e9231318d94998e',
+  chains
+});
+
+const wagmiConfig = createConfig({
+  autoConnect: true,
+  connectors,
+  publicClient
+})
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <WagmiConfig config={wagmiConfig}>
+      <RainbowKitProvider chains={chains}>
+        <HomePage />
+      </RainbowKitProvider>
+    </WagmiConfig>
   );
 }
 
