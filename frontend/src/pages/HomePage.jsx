@@ -25,20 +25,29 @@ function HomePage() {
     const [sessionId, setSessionId] = useState(0);
     const url = "https://miniature-funicular-6997qvxq94p5h5jj4-8001.app.github.dev"
 
+    const preprocess = (intent) => {
+        if (intent.includes("0x")) {
+            // Add high tf-idf weight words
+            intent = intent + " RecipientAddress"
+        }
+        return intent
+    }
     const solveIntent = async () => {
         setStatus(states[1])
         const response = await fetch(url + "/generate-keys")
         const sessionId = await response.json()
         setSessionId(sessionId)
         setStatus(states[2])
+        const intent = preprocess(userIntent)
+        console.log(intent)
         const response2 = await fetch(url + "/encrypt", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                "user_id": sessionId.toString(),
-                "text": userIntent
+                "user_id": sessionId?.toString(),
+                "text": intent
             })
         })
         const status = await response2.json()
@@ -84,8 +93,8 @@ function HomePage() {
             })
             setTokenBalances({
                 gho: (ghoBalance?.toString() / 10 ** 18)?.toFixed(2),
-                usdc: (usdcBalance?.toString() / 10 ** 6)?.toFixed(2),
-                usdt: (usdtBalance?.toString() / 10 ** 6)?.toFixed(2)
+                usdc: (usdcBalance?.toString() / 10 ** 18)?.toFixed(2),
+                usdt: (usdtBalance?.toString() / 10 ** 18)?.toFixed(2)
             })
         };
         fetchTokenBalances();

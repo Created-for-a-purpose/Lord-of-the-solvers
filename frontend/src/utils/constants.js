@@ -22,6 +22,11 @@ export const tokenAbi = [
         "inputs": [
             {
                 "internalType": "address",
+                "name": "sender",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
                 "name": "to",
                 "type": "address"
             },
@@ -43,13 +48,18 @@ export const tokenAbi = [
         "type": "function"
     }]
 
-export const usdcAddress = "0x42175C2d49f8a0801d4E955FA144eAB9aC8F189a"
-export const usdtAddress = "0xF8A7b0fe30c7e0e73a039ABed21cFee369780e84"
+export const usdcAddress = "0xDE9A83CF7eC33484BaE7a90201F5f079630Bb3fd"
+export const usdtAddress = "0x6EfcF437Acf9B44DAB1938CAfBeAAE428a603eB2"
 export const ghoAddress = "0xc4bF5CbDaBE595361438F8c6a187bDc330539c60"
 
 export const swapAbi = [
     {
         "inputs": [
+            {
+                "internalType": "address",
+                "name": "sender",
+                "type": "address"
+            },
             {
                 "internalType": "address",
                 "name": "fromToken",
@@ -72,4 +82,5 @@ export const swapAbi = [
         "type": "function"
     }
 ]
-export const swapAddress = "0x645e23309beBb72d6c8beE06cA5cFa75Bd973071"
+
+export const swapAddress = "0x2f66ed3edcaF73DA47768Ff9Da382993A3bA3535"
