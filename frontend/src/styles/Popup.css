@@ -33,13 +33,14 @@
 }
 
 .solution-section {
-    width: 90%;
+    max-width: 90%;
     height: 200px;
     background-color: rgb(221, 220, 220);
     border-radius: 10px;
     padding: 5px 10px;
     margin: 3rem auto 1rem;
     box-shadow: 0 0 10px rgb(8, 0, 84);
+    word-wrap: break-word;
 }
 
 .solution-section p {

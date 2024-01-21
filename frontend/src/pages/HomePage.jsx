@@ -17,8 +17,44 @@ function HomePage() {
     const states = ["Idle", "Generating FHE keys", "Encrypting your intent", "Solving your intent", "Solved"]
     const [userIntent, setUserIntent] = useState("");
     const [status, setStatus] = useState("Idle");
+    const [encryptedSolution, setEncryptedSolution] = useState("")
+    const [sessionId, setSessionId] = useState(0);
+    const url = "https://silver-carnival-7j7qwx5xvq72x6gp.github.dev/"
 
-    const handleSolveIntent = () => {
+    const solveIntent = async () => {
+        setStatus(states[1])
+        const response = await fetch(url + "/generate-keys")
+        const sessionId = await response.json()
+        setSessionId(sessionId)
+        setStatus(states[2])
+        const response2 = await fetch(url + "/encrypt", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "user_id": sessionId.toString(),
+                "text": userIntent
+            })
+        })
+        const status = await response2.json()
+        if (!status) {
+            setStatus(states[0])
+            return
+        }
+        setStatus(states[3])
+        const response3 = await fetch(url + "/solve/" + sessionId.toString(), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+        })
+        const solution = await response3.json()
+        if (!solution) {
+            setStatus(states[0])
+            return
+        }
+        setEncryptedSolution(solution)
         setStatus(states[4])
     };
 
@@ -64,11 +100,12 @@ function HomePage() {
                     onChange={(e) => setUserIntent(e.target.value)}
                 />
                 {status !== 'Idle' && <h3>{status}...</h3>}
-                <button className="solve-button" onClick={handleSolveIntent}>
+                <button className="solve-button" onClick={solveIntent}>
                     Solve
                 </button>
             </div>
-            {status === 'Solved' && <Popup close={setStatus} />}
+            {status === 'Solved' && <Popup close={setStatus} encryptedSolution={encryptedSolution}
+            sessionId={sessionId} intent={userIntent} url={url}/>}
         </>
     );
 }
