@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from joblib import load
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer 
@@ -18,6 +19,8 @@ import pandas as pd
 
 current_dir = Path(__file__).parent
 
+ENCRYPTED_DATA_BROWSER_LIMIT = 500
+
 # Load the model
 fhe_model = FHEModelServer(Path.joinpath(current_dir, "solver_fhe_model"))
 tfidf_vectorizer = load("tfidf_vectorizer.joblib")
@@ -28,6 +31,15 @@ class PredictRequest(BaseModel):
 
 # Initialize an instance of FastAPI
 app = FastAPI()
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/generate-keys")
 def keygen():
@@ -46,8 +58,14 @@ def keygen():
     numpy.save(f"tmp/tmp_evaluation_key_{session_id}.npy", evaluation_key)
     return session_id
 
+class EncryptionData(BaseModel):
+    user_id: str
+    text: str
+
 @app.post("/encrypt")
-def encode_quantize_encrypt(user_id, text):
+def encode_quantize_encrypt(data: EncryptionData):
+    user_id = data.user_id
+    text = data.user_id
     print("Encrypting...")
     if not user_id:
         raise gr.Error("You need to generate FHE keys first.")
@@ -61,9 +79,9 @@ def encode_quantize_encrypt(user_id, text):
     numpy.save(f"tmp/tmp_encrypted_quantized_encoding_{user_id}.npy", encrypted_quantized_encoding)
     return 1
 
-@app.post("/solve")
-def run_fhe(user_id):
-    print("Solving your intent...")
+@app.post("/solve/{user_id}")
+def run_fhe(user_id: str):
+    print(f"Solving your intent... {user_id}")
     encoded_data_path = Path(f"tmp/tmp_encrypted_quantized_encoding_{user_id}.npy")
     if not user_id:
         raise gr.Error("You need to generate FHE keys first.")
@@ -90,11 +108,13 @@ def run_fhe(user_id):
     encrypted_prediction = base64.b64decode(response.json()["encrypted_prediction"])
 
     numpy.save(f"tmp/tmp_encrypted_prediction_{user_id}.npy", encrypted_prediction)
-    return 1
+    encrypted_prediction_shorten = list(encrypted_prediction)[:ENCRYPTED_DATA_BROWSER_LIMIT]
+    encrypted_prediction_shorten_hex = ''.join(f'{i:02x}' for i in encrypted_prediction_shorten)
+    return encrypted_prediction_shorten_hex
 
-@app.post("/decrypt")
-def decrypt_prediction(user_id):
-    print("Decrypting results...")
+@app.post("/decrypt/{user_id}")
+def decrypt_prediction(user_id: str):
+    print(f"Decrypting results... {user_id}")
     encoded_data_path = Path(f"tmp/tmp_encrypted_prediction_{user_id}.npy")
     if not user_id:
         raise gr.Error("You need to generate FHE keys first.")
