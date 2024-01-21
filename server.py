@@ -1,19 +1,9 @@
 from fastapi import FastAPI
 from joblib import load
-from sklearn.feature_extraction.text import TfidfVectorizer 
 from concrete.ml.deployment import FHEModelServer
 from pydantic import BaseModel
 import base64
 from pathlib import Path
-import numpy
-import os
-import requests
-import json
-import base64
-import subprocess
-import shutil
-import time
-import pandas as pd
 
 current_dir = Path(__file__).parent
 
