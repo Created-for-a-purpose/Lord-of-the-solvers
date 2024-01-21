@@ -1,14 +1,18 @@
 import "../styles/HomePage.css";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Popup from "../components/Popup"
 import token from "../assets/token.png";
 import gho from "../assets/gho.svg"
 import usdc from "../assets/usdc.svg"
 import usdt from "../assets/usdt.svg"
 import lots from "../assets/lots.png"
+import { readContract } from "wagmi/actions"
+import { useAccount } from "wagmi";
+import { tokenAbi, ghoAddress, usdcAddress, usdtAddress } from "../utils/constants";
 
 function HomePage() {
+    const { address } = useAccount()
     const [tokenBalances, setTokenBalances] = useState({
         usdc: 0,
         usdt: 0,
@@ -19,7 +23,7 @@ function HomePage() {
     const [status, setStatus] = useState("Idle");
     const [encryptedSolution, setEncryptedSolution] = useState("")
     const [sessionId, setSessionId] = useState(0);
-    const url = "https://silver-carnival-7j7qwx5xvq72x6gp.github.dev/"
+    const url = "https://miniature-funicular-6997qvxq94p5h5jj4-8001.app.github.dev"
 
     const solveIntent = async () => {
         setStatus(states[1])
@@ -57,6 +61,36 @@ function HomePage() {
         setEncryptedSolution(solution)
         setStatus(states[4])
     };
+
+    useEffect(() => {
+        const fetchTokenBalances = async () => {
+            const ghoBalance = await readContract({
+                address: ghoAddress,
+                abi: tokenAbi,
+                method: "balanceOf",
+                args: [address]
+            })
+            const usdcBalance = await readContract({
+                address: usdcAddress,
+                abi: tokenAbi,
+                method: "balanceOf",
+                args: [address]
+            })
+            const usdtBalance = await readContract({
+                address: usdtAddress,
+                abi: tokenAbi,
+                method: "balanceOf",
+                args: [address]
+            })
+            setTokenBalances({
+                gho: (ghoBalance?.toString() / 10 ** 18)?.toFixed(2),
+                usdc: (usdcBalance?.toString() / 10 ** 6)?.toFixed(2),
+                usdt: (usdtBalance?.toString() / 10 ** 6)?.toFixed(2)
+            })
+        };
+        fetchTokenBalances();
+    }
+        , []);
 
     return (
         <>
@@ -105,7 +139,7 @@ function HomePage() {
                 </button>
             </div>
             {status === 'Solved' && <Popup close={setStatus} encryptedSolution={encryptedSolution}
-            sessionId={sessionId} intent={userIntent} url={url}/>}
+                sessionId={sessionId} intent={userIntent} url={url} />}
         </>
     );
 }

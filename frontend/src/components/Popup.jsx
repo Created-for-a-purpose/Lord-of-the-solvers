@@ -1,12 +1,17 @@
 import "../styles/Popup.css";
 import { useState } from "react";
 import { tokenizer } from "../utils/tokenizer.js"
+import { useAccount } from "wagmi";
+import { tokenAbi, ghoAddress } from "../utils/constants";
 
 const Popup = ({ close, url, intent, encryptedSolution, sessionId }) => {
     const [buttonText, setButtonText] = useState("🔑 Decrypt")
     const [solution, setSolution] = useState("")
+    const [txData, setTxData] = useState(null)
+    const { address } = useAccount()
 
     const decryptSolution = async () => {
+        if (buttonText === "Confirm ✅") return confirm()
         const response = await fetch(url + "/decrypt/" + sessionId, {
             method: "POST",
             headers: {
@@ -14,9 +19,13 @@ const Popup = ({ close, url, intent, encryptedSolution, sessionId }) => {
             }
         })
         const solution = await response.json()
-        const solutionText = tokenizer(solution, intent)
-        setSolution(solutionText)
+        const { decodedIntent, txData } = tokenizer(solution, intent)
+        setTxData(txData)
+        setSolution(decodedIntent)
         setButtonText("Confirm ✅")
+    }
+
+    const confirm = async () => {
     }
 
     return (
@@ -29,7 +38,7 @@ const Popup = ({ close, url, intent, encryptedSolution, sessionId }) => {
                         {encryptedSolution?.slice(101, 150)} <br />
                         {encryptedSolution?.slice(151, 200)} <br />
                         {encryptedSolution?.slice(201, 250)}
-                    </p>) : (<p>Decrypted Solution:<br/><br/>{solution} </p>)}
+                    </p>) : (<p>Decrypted Solution:<br /><br />{solution} </p>)}
                 </div>
                 <button className="decrypt-button" onClick={decryptSolution}>
                     {buttonText}

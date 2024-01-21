@@ -42,8 +42,13 @@ const swapTokenizer = (text) => {
 
     const to = tokenized.filter((word) => word !== from)[0]
 
+    const txData = {
+        amount,
+        from,
+        to
+    }
     const decodedIntent = `You want to swap ${amount} ${from} for ${to}`
-    return decodedIntent;
+    return {txData, decodedIntent};
 }
 
 const sendTokenizer = (text) => { }
